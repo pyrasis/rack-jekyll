@@ -80,13 +80,9 @@ module Rack
         time = file[:time]
         hdrs = { 'Last-Modified'  => time }
 
-        if time == @request.env['HTTP_IF_MODIFIED_SINCE']
-          [304, hdrs, []]
-        else
-          hdrs.update({ 'Content-length' => body.bytesize.to_s,
-                        'Content-Type'   => mime, } )
-          [@response.status, hdrs, [body]]
-        end
+        hdrs.update({ 'Content-length' => body.bytesize.to_s,
+                      'Content-Type'   => mime, } )
+        [@response.status, hdrs, [body]]
 
       else
         status, body, path_info = ::File.exist?(@path+"/404.html") ? [404,file_info(@path+"/404.html")[:body],"404.html"] : [404,"Not found","404.html"]
