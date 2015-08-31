@@ -28,7 +28,7 @@ module Rack
       @compiling = true
       site.process
       @compiling = false
-      
+
       if options['auto']
         require 'listen'
         require 'pathname'
@@ -38,7 +38,7 @@ module Rack
                               .to_path
         puts "Auto-regenerating enabled: #{source} -> #{destination}"
 
-        Listen.to(source, :ignore => %r{#{Regexp.escape(destination)}}) do |modified, added, removed|
+        listener = Listen.to(source, :ignore => %r{#{Regexp.escape(destination)}}) do |modified, added, removed|
           @compiling = true
           t = Time.now.strftime("%Y-%m-%d %H:%M:%S")
           n = modified.length + added.length + removed.length
@@ -47,6 +47,7 @@ module Rack
           @files = ::Dir[@path + "/**/*"].inspect
           @compiling = false
         end
+        listener.start
       end
     end
 
@@ -80,15 +81,19 @@ module Rack
         time = file[:time]
         hdrs = { 'Last-Modified'  => time }
 
-        hdrs.update({ 'Content-length' => body.bytesize.to_s,
-                      'Content-Type'   => mime, } )
-        [@response.status, hdrs, [body]]
+        if time == @request.env['HTTP_IF_MODIFIED_SINCE']
+          [304, hdrs, []]
+        else
+          hdrs.update({ 'Content-Length' => body.bytesize.to_s,
+                        'Content-Type'   => mime, } )
+          [@response.status, hdrs, [body]]
+        end
 
       else
         status, body, path_info = ::File.exist?(@path+"/404.html") ? [404,file_info(@path+"/404.html")[:body],"404.html"] : [404,"Not found","404.html"]
         mime = mime(path_info)
 
-        [status, {"Content-Type" => mime, "Content-length" => body.bytesize.to_s}, [body]]
+        [status, {"Content-Type" => mime, "Content-Length" => body.bytesize.to_s}, [body]]
       end
     end
   end
