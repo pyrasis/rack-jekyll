@@ -67,8 +67,8 @@ module Rack
       while @compiling
         sleep 0.1
       end
-      @files = ::Dir[@path + "/**/*"].inspect if @files == "[]"
-      if @files.include?(path_info)
+      #@files = ::Dir[@path + "/**/*"].inspect if @files == "[]"
+      #if @files.include?(path_info)
         if path_info =~ /(\/?)$/
           if @mimes.collect {|regex| path_info =~ regex }.compact.empty?
             path_info += $1.nil? ? "/index.html" : "index.html"
@@ -89,12 +89,12 @@ module Rack
           [@response.status, hdrs, [body]]
         end
 
-      else
-        status, body, path_info = ::File.exist?(@path+"/404.html") ? [404,file_info(@path+"/404.html")[:body],"404.html"] : [404,"Not found","404.html"]
-        mime = mime(path_info)
+      #else
+      #  status, body, path_info = ::File.exist?(@path+"/404.html") ? [404,file_info(@path+"/404.html")[:body],"404.html"] : [404,"Not found","404.html"]
+      #  mime = mime(path_info)
 
-        [status, {"Content-Type" => mime, "Content-Length" => body.bytesize.to_s}, [body]]
-      end
+      #  [status, {"Content-Type" => mime, "Content-Length" => body.bytesize.to_s}, [body]]
+      #end
     end
   end
 end
