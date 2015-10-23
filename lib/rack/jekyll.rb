@@ -26,7 +26,7 @@ module Rack
       site = ::Jekyll::Site.new(options)
 
       @compiling = true
-      site.process
+      #site.process
       @compiling = false
 
       if options['auto']
